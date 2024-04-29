@@ -1,6 +1,6 @@
 from typing import Final
 
-DOMAIN = "inim_alarm"
+DOMAIN = "inim"
 
 CONF_CLIENT_ID: Final = "client_id"
 CONF_DEVICE_ID: Final = "device_id"

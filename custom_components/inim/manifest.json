@@ -5,7 +5,7 @@
   "config_flow": false,
   "dependencies": [],
   "documentation": "https://github.com/nidble/inim_alarm/",
-  "domain": "inim_alarm",
+  "domain": "inim",
   "iot_class": "cloud_polling",
   "name": "Inim Alarm",
   "requirements": [

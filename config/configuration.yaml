@@ -3,7 +3,7 @@
 default_config:
 
 alarm_control_panel:
-  - platform: inim_alarm
+  - platform: inim
     password: !secret inim_alarm_password
     username: !secret inim_alarm_username
     client_id: '123456'
