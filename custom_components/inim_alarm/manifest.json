@@ -1,0 +1,15 @@
+{
+  "codeowners": [
+    "@nidble"
+  ],
+  "config_flow": false,
+  "dependencies": [],
+  "documentation": "https://github.com/nidble/inim_alarm/",
+  "domain": "inim_alarm",
+  "iot_class": "cloud_polling",
+  "name": "Inim Alarm",
+  "requirements": [
+    "git+https://github.com/nidble/pyinim.git@master#pyinim_nidble==0.0.10"
+  ],
+  "version": "0.1.0"
+}
