@@ -152,26 +152,19 @@ class InimAlarmControlPanel(Entity):
         """Send disarm command."""
         await self._client.get_activate_scenario(self._device_id, self._scenarios[STATE_ALARM_DISARMED])
         self._attr_state = STATE_ALARM_DISARMED
-        # self.state = STATE_ALARM_DISARMED
-        # self.async_write_ha_state()
-        # await self.async_update_ha_state()
-        await self.async_device_update()
 
     async def async_alarm_arm_away(self, code: str | None = None) -> None:
         """Send arm away command. Uses custom mode."""
         await self._client.get_activate_scenario(self._device_id, self._scenarios[STATE_ALARM_ARMED_AWAY])
         self._attr_state = STATE_ALARM_ARMED_AWAY
-        await self.async_device_update()
 
 
     async def async_alarm_arm_home(self, code: str | None = None) -> None:
         """Send arm home command. Uses custom mode."""
         await self._client.get_activate_scenario(self._device_id, self._scenarios[STATE_ALARM_ARMED_HOME])
         self._attr_state = STATE_ALARM_ARMED_HOME
-        await self.async_device_update()
 
     async def async_alarm_arm_night(self, code: str | None = None) -> None:
         """Send arm night command. Uses custom mode."""
         await self._client.get_activate_scenario(self._device_id, self._scenarios[STATE_ALARM_ARMED_NIGHT])
         self._attr_state = STATE_ALARM_ARMED_NIGHT
-        await self.async_device_update()
