@@ -2,7 +2,6 @@
 
 # see homeassistant/components/agent_dvr/alarm_control_panel.py
 
-from __future__ import annotations
 import logging
 from typing import Callable, Optional, Mapping
 from datetime import timedelta
@@ -15,7 +14,6 @@ from homeassistant.components.alarm_control_panel import (
     PLATFORM_SCHEMA
 )
 from homeassistant.helpers.entity import Entity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CONF_USERNAME,
     CONF_PASSWORD,
@@ -24,9 +22,7 @@ from homeassistant.const import (
     STATE_ALARM_ARMED_NIGHT,
     STATE_ALARM_DISARMED,
 )
-# from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
-# from homeassistant.helpers.entity_platform import AddEntitiesCallback
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import (
@@ -130,7 +126,7 @@ class InimAlarmControlPanel(Entity):
             _, _, resp = await self._client.get_devices_extended(self._device_id)
             scenario = resp.Data[self._device_id].ActiveScenario
             self._attr_available = True
-            _LOGGER.info(f"INIM alarm panel got updated with scenario: {scenario}")
+            _LOGGER.info(f"INIM alarm panel was updated with scenario: {scenario}")
 
             if scenario == self._scenarios[STATE_ALARM_ARMED_AWAY]:
                 self._attr_state = STATE_ALARM_ARMED_AWAY
@@ -150,21 +146,22 @@ class InimAlarmControlPanel(Entity):
 
     async def async_alarm_disarm(self, code: str | None = None) -> None:
         """Send disarm command."""
-        await self._client.get_activate_scenario(self._device_id, self._scenarios[STATE_ALARM_DISARMED])
-        self._attr_state = STATE_ALARM_DISARMED
+        await self._async_arm(STATE_ALARM_DISARMED)
 
     async def async_alarm_arm_away(self, code: str | None = None) -> None:
-        """Send arm away command. Uses custom mode."""
-        await self._client.get_activate_scenario(self._device_id, self._scenarios[STATE_ALARM_ARMED_AWAY])
-        self._attr_state = STATE_ALARM_ARMED_AWAY
-
+        """Send arm away command."""
+        await self._async_arm(STATE_ALARM_ARMED_AWAY)
 
     async def async_alarm_arm_home(self, code: str | None = None) -> None:
-        """Send arm home command. Uses custom mode."""
-        await self._client.get_activate_scenario(self._device_id, self._scenarios[STATE_ALARM_ARMED_HOME])
-        self._attr_state = STATE_ALARM_ARMED_HOME
+        """Send arm home command."""
+        await self._async_arm(STATE_ALARM_ARMED_HOME)
 
     async def async_alarm_arm_night(self, code: str | None = None) -> None:
-        """Send arm night command. Uses custom mode."""
-        await self._client.get_activate_scenario(self._device_id, self._scenarios[STATE_ALARM_ARMED_NIGHT])
-        self._attr_state = STATE_ALARM_ARMED_NIGHT
+        """Send arm night command."""
+        await self._async_arm(STATE_ALARM_ARMED_NIGHT)
+
+    async def _async_arm(self, state: str):
+        await self._client.get_activate_scenario(self._device_id, self._scenarios[state])
+        await self._client.sleep(4)
+        self._attr_state = state
+        _LOGGER.info(f"INIM alarm panel is going to be updated with: {state}/{self._scenarios[state]}")
