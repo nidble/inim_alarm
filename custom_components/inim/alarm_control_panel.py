@@ -31,12 +31,12 @@ from homeassistant.helpers.typing import (
     HomeAssistantType,
 )
 
-from pyinim_nidble.inim_cloud import InimCloud
+from pyinim.inim_cloud import InimCloud
 from .const import DOMAIN, CONF_CLIENT_ID, CONF_DEVICE_ID, CONF_SCENARIOS
 
 _LOGGER = logging.getLogger(__name__)
 # time between update data from API
-SCAN_INTERVAL = timedelta(minutes=2)
+SCAN_INTERVAL = timedelta(seconds=42)
 
 CONST_ALARM_CONTROL_PANEL_NAME = "Alarm Panel"
 
