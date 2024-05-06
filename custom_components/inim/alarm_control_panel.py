@@ -31,12 +31,12 @@ from homeassistant.helpers.typing import (
     HomeAssistantType,
 )
 
-from pyinim_nidble.inim_cloud import InimCloud
+from pyinim.inim_cloud import InimCloud
 from .const import DOMAIN, CONF_CLIENT_ID, CONF_DEVICE_ID, CONF_SCENARIOS
 
 _LOGGER = logging.getLogger(__name__)
 # time between update data from API
-SCAN_INTERVAL = timedelta(minutes=2)
+SCAN_INTERVAL = timedelta(seconds=42)
 
 CONST_ALARM_CONTROL_PANEL_NAME = "Alarm Panel"
 
@@ -165,3 +165,8 @@ class InimAlarmControlPanel(Entity):
         await self._client.sleep(4)
         self._attr_state = state
         _LOGGER.info(f"INIM alarm panel is going to be updated with: {state}/{self._scenarios[state]}")
+        # see daikin integration, async_schedule_update_ha_state
+        # await self.async_device_update()
+        # self.async_write_ha_state()
+        # await self.async_update_ha_state()
+        # self.async_schedule_update_ha_state(True)
