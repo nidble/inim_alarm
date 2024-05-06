@@ -165,8 +165,3 @@ class InimAlarmControlPanel(Entity):
         await self._client.sleep(4)
         self._attr_state = state
         _LOGGER.info(f"INIM alarm panel is going to be updated with: {state}/{self._scenarios[state]}")
-        # see daikin integration, async_schedule_update_ha_state
-        # await self.async_device_update()
-        # self.async_write_ha_state()
-        # await self.async_update_ha_state()
-        # self.async_schedule_update_ha_state(True)
