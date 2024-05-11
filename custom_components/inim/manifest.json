@@ -9,7 +9,7 @@
   "iot_class": "cloud_polling",
   "name": "Inim Alarm",
   "requirements": [
-    "pyinim==0.0.15"
+    "pyinim==0.0.16"
   ],
-  "version": "0.1.15"
+  "version": "0.1.16"
 }
