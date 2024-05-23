@@ -1,7 +1,7 @@
 """Support for INIM Alarm Control Panels."""
 
+from collections.abc import Mapping
 import logging
-from typing import Mapping
 
 # from aiohttp import ClientError
 from pyinim.inim_cloud import InimCloud
@@ -29,8 +29,6 @@ from homeassistant.helpers.update_coordinator import (
 from .const import CONF_DEVICE_ID, CONF_SCENARIOS, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
-# time between update data from API
-# SCAN_INTERVAL = timedelta(seconds=42)
 
 CONST_ALARM_CONTROL_PANEL_NAME = "Alarm Panel"
 
@@ -132,35 +130,6 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
                 f"Error retrieving data from INIM services: {Exception}"  # noqa: G004
             )
 
-        # return self._attr_state
-
-    # async def async_update(self) -> None:
-    #     """Update the state of the device."""
-    #     try:
-    #         await self._client.get_request_poll(self._device_id)
-    #         _, _, resp = await self._client.get_devices_extended(self._device_id)
-    #         scenario = resp.Data[self._device_id].ActiveScenario
-    #         self._attr_available = True
-    #         _LOGGER.info(f"INIM alarm panel was updated with scenario: {scenario}")  # noqa: G004
-
-    #         if scenario == self._scenarios[STATE_ALARM_ARMED_AWAY]:
-    #             self._attr_state = STATE_ALARM_ARMED_AWAY
-    #             return
-    #         if scenario == self._scenarios[STATE_ALARM_DISARMED]:
-    #             self._attr_state = STATE_ALARM_DISARMED
-    #             return
-    #         if scenario == self._scenarios[STATE_ALARM_ARMED_NIGHT]:
-    #             self._attr_state = STATE_ALARM_ARMED_NIGHT
-    #             return
-    #         if scenario == self._scenarios[STATE_ALARM_ARMED_HOME]:
-    #             self._attr_state = STATE_ALARM_ARMED_HOME
-
-    #     except ClientError:
-    #         self._attr_available = False
-    #         _LOGGER.exception(
-    #             f"Error retrieving data from INIM services: {ClientError}"  # noqa: G004
-    #         )
-
     async def async_alarm_disarm(self, code: str | None = None) -> None:
         """Send disarm command."""
         await self._async_arm(STATE_ALARM_DISARMED)
@@ -184,9 +153,3 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
         _LOGGER.info(
             f"INIM alarm panel is going to be updated with: {state}/{self._scenarios[state]}"  # noqa: G004
         )
-
-        # see daikin integration, async_schedule_update_ha_state
-        # await self.async_device_update()
-        # self.async_write_ha_state()
-        # await self.async_update_ha_state()
-        # self.async_schedule_update_ha_state(True)

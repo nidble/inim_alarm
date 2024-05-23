@@ -27,15 +27,6 @@ async def async_setup_platform(
     coordinator = hass.data[DOMAIN]["coordinator"]
     conf = hass.data[DOMAIN]["conf"]
 
-    # Fetch initial data so we have data when entities subscribe
-    #
-    # If the refresh fails, async_config_entry_first_refresh will
-    # raise ConfigEntryNotReady and setup will try again later
-    #
-    # If you do not want to retry setup on failure, use
-    # coordinator.async_refresh() instead
-    #
-
     await coordinator.async_config_entry_first_refresh()
     device_id = conf[CONF_DEVICE_ID]
     res: Device = coordinator.data.Data[device_id]
@@ -45,15 +36,8 @@ async def async_setup_platform(
     )
 
 
-# _InimCoordinatorT = TypeVar(
-#     "_InimCoordinatorT",
-#     bound=(RingDataCoordinator),
-# )
-# class InimBinarySensorEntity(CoordinatorEntity[_InimCoordinatorT], BinarySensorEntity):
-
-
 class InimBinarySensorEntity(CoordinatorEntity, BinarySensorEntity):
-    """Represents a Query for a switch game."""
+    """Represents a Presense Sensor for every Zone."""
 
     def __init__(  # noqa: D107
         self,
@@ -74,11 +58,6 @@ class InimBinarySensorEntity(CoordinatorEntity, BinarySensorEntity):
             name=Zone.Name,
         )
         self._attr_unique_id = self.get_unique_id()
-
-    # @property
-    # def unit_of_measurement(self):
-    #     """Return the unit of measurement of this entity, if any."""
-    #     return "on sale"
 
     # @property
     # def icon(self):
