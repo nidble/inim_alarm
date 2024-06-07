@@ -1,99 +1,75 @@
 """Support for INIM Alarm Control Panels."""
 
-# see homeassistant/components/agent_dvr/alarm_control_panel.py
-
+from collections.abc import Mapping
 import logging
-from typing import Callable, Optional, Mapping
-from datetime import timedelta
-from aiohttp import ClientError
 
-import voluptuous as vol
+# from aiohttp import ClientError
+from pyinim.inim_cloud import InimCloud
 
+from config.inim_alarm.custom_components.inim.types import InimResult
 from homeassistant.components.alarm_control_panel import (
+    AlarmControlPanelEntity,
     AlarmControlPanelEntityFeature,
-    PLATFORM_SCHEMA
 )
-from homeassistant.helpers.entity import Entity
 from homeassistant.const import (
-    CONF_USERNAME,
-    CONF_PASSWORD,
     STATE_ALARM_ARMED_AWAY,
     STATE_ALARM_ARMED_HOME,
     STATE_ALARM_ARMED_NIGHT,
     STATE_ALARM_DISARMED,
 )
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.typing import (
-    ConfigType,
-    DiscoveryInfoType,
-    HomeAssistantType,
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import StateType
+from homeassistant.helpers.update_coordinator import (
+    CoordinatorEntity,
+    DataUpdateCoordinator,
 )
 
-from pyinim.inim_cloud import InimCloud
-from .const import DOMAIN, CONF_CLIENT_ID, CONF_DEVICE_ID, CONF_SCENARIOS
+from .const import CONF_DEVICE_ID, CONF_SCENARIOS, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
-# time between update data from API
-SCAN_INTERVAL = timedelta(seconds=42)
 
 CONST_ALARM_CONTROL_PANEL_NAME = "Alarm Panel"
 
-SCENARIOS_SCHEMA = vol.Schema(
-    {
-        # vol.Optional(STATE_ALARM_ARMED_AWAY, default=0): cv.positive_int,
-        vol.Optional(STATE_ALARM_ARMED_AWAY): cv.positive_int,
-        vol.Optional(STATE_ALARM_DISARMED): cv.positive_int,
-        vol.Optional(STATE_ALARM_ARMED_NIGHT): cv.positive_int,
-        vol.Optional(STATE_ALARM_ARMED_HOME): cv.positive_int,
-    }
-)
 
-DEFAULT_SCENARIOS_SCHEMA = {
-    STATE_ALARM_ARMED_AWAY: 0,
-    STATE_ALARM_DISARMED: 1,
-    STATE_ALARM_ARMED_NIGHT: 2,
-    STATE_ALARM_ARMED_HOME: 3,
-}
+async def async_setup_platform(
+    hass: HomeAssistant,
+    config,
+    async_add_entities: AddEntitiesCallback,
+    discovery_info=None,
+):
+    """Setups the sensor platform."""
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_USERNAME): cv.string,
-        vol.Required(CONF_PASSWORD): cv.string,
-        vol.Required(CONF_CLIENT_ID): cv.string,
-        vol.Required(CONF_DEVICE_ID): cv.string,
-        vol.Optional(CONF_SCENARIOS, default=DEFAULT_SCENARIOS_SCHEMA): SCENARIOS_SCHEMA,
-    }
-)
+    coordinator = hass.data[DOMAIN]["coordinator"]
+    inim_cloud_api = hass.data[DOMAIN]["inim_cloud_api"]
+    conf = hass.data[DOMAIN]["conf"]
 
-# async def async_setup_platform(
-def setup_platform(
-    hass: HomeAssistantType,
-    config: ConfigType,
-    async_add_entities: Callable,
-    discovery_info: Optional[DiscoveryInfoType] = None,
-) -> None:
-    """Set up the sensor platform."""
-    inim = InimCloud(
-        async_get_clientsession(hass),
-        name='Inim',
-        username=config[CONF_USERNAME],
-        password=config[CONF_PASSWORD],
-        client_id=config[CONF_CLIENT_ID]
-    )
+    # Fetch initial data so we have data when entities subscribe
+    #
+    # If the refresh fails, async_config_entry_first_refresh will
+    # raise ConfigEntryNotReady and setup will try again later
+    #
+    # If you do not want to retry setup on failure, use
+    # coordinator.async_refresh() instead
+    #
+    # await coordinator.async_config_entry_first_refresh()
+    # devices: InimResult = coordinator.data
+
     alarm_control_panels = [
-        InimAlarmControlPanel(
-            inim,
-            config[CONF_DEVICE_ID],
-            config[CONF_SCENARIOS],
-            'alarm_control_panel',
-            '0.0.1'
+        InimAlarmControlPanelEntity(
+            coordinator,
+            inim_cloud_api,
+            conf[CONF_DEVICE_ID],
+            conf[CONF_SCENARIOS],
+            "alarm_control_panel",
+            "0.0.1",
         )
     ]
     async_add_entities(alarm_control_panels, update_before_add=True)
 
-class InimAlarmControlPanel(Entity):
+
+class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
     """Representation of an Inim Alarm Control Panel."""
 
     _attr_supported_features = (
@@ -104,8 +80,19 @@ class InimAlarmControlPanel(Entity):
     _attr_has_entity_name = True
     _attr_name = None
 
-    def __init__(self, inim: InimCloud, device_id: str, scenarios: Mapping[str, int], unique_id: str, version: str):
+    def __init__(
+        self,
+        coordinator: DataUpdateCoordinator[InimResult],
+        inim: InimCloud,
+        device_id: str,
+        scenarios: Mapping[str, int],
+        unique_id: str,
+        version: str,
+    ):
         """Initialize the alarm control panel."""
+
+        super().__init__(coordinator)  # , context=zone.ZoneId)
+
         self._client = inim
         self._device_id = device_id
         self._scenarios = scenarios
@@ -119,30 +106,29 @@ class InimAlarmControlPanel(Entity):
             sw_version=version,
         )
 
-    async def async_update(self) -> None:
-        """Update the state of the device."""
+    @property
+    def state(self) -> StateType:
+        """Return the state of the entity."""
         try:
-            await self._client.get_request_poll(self._device_id)
-            _, _, resp = await self._client.get_devices_extended(self._device_id)
-            scenario = resp.Data[self._device_id].ActiveScenario
-            self._attr_available = True
-            _LOGGER.info(f"INIM alarm panel was updated with scenario: {scenario}")
+            scenario = self.coordinator.data.Data[self._device_id].ActiveScenario
+            _LOGGER.info(f"INIM alarm panel was updated with scenario: {scenario}")  # noqa: G004
 
             if scenario == self._scenarios[STATE_ALARM_ARMED_AWAY]:
-                self._attr_state = STATE_ALARM_ARMED_AWAY
-                return
-            if scenario == self._scenarios[STATE_ALARM_DISARMED]:
-                self._attr_state = STATE_ALARM_DISARMED
-                return
-            if scenario == self._scenarios[STATE_ALARM_ARMED_NIGHT]:
-                self._attr_state = STATE_ALARM_ARMED_NIGHT
-                return
-            if scenario == self._scenarios[STATE_ALARM_ARMED_HOME]:
-                self._attr_state = STATE_ALARM_ARMED_HOME
+                return STATE_ALARM_ARMED_AWAY
 
-        except (ClientError):
-            self._attr_available = False
-            _LOGGER.exception(f"Error retrieving data from INIM services: {ClientError}")
+            if scenario == self._scenarios[STATE_ALARM_DISARMED]:
+                return STATE_ALARM_DISARMED
+
+            if scenario == self._scenarios[STATE_ALARM_ARMED_NIGHT]:
+                return STATE_ALARM_ARMED_NIGHT
+
+            if scenario == self._scenarios[STATE_ALARM_ARMED_HOME]:
+                return STATE_ALARM_ARMED_HOME
+
+        except Exception:
+            _LOGGER.exception(
+                f"Error retrieving data from INIM services: {Exception}"  # noqa: G004
+            )
 
     async def async_alarm_disarm(self, code: str | None = None) -> None:
         """Send disarm command."""
@@ -161,7 +147,9 @@ class InimAlarmControlPanel(Entity):
         await self._async_arm(STATE_ALARM_ARMED_NIGHT)
 
     async def _async_arm(self, state: str):
-        await self._client.get_activate_scenario(self._device_id, self._scenarios[state])
-        await self._client.sleep(4)
-        self._attr_state = state
-        _LOGGER.info(f"INIM alarm panel is going to be updated with: {state}/{self._scenarios[state]}")
+        await self._client.get_activate_scenario(
+            self._device_id, self._scenarios[state]
+        )
+        _LOGGER.info(
+            f"INIM alarm panel is going to be updated with: {state}/{self._scenarios[state]}"  # noqa: G004
+        )
