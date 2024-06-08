@@ -1,6 +1,7 @@
 """Support for INIM Alarm Control Panels."""
 
 from collections.abc import Mapping
+from functools import cached_property
 import logging
 
 # from aiohttp import ClientError
@@ -106,6 +107,18 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
             sw_version=version,
         )
 
+    @cached_property
+    def code_arm_required(self) -> bool:
+        """Whether the code is required for arm actions."""
+
+        """
+        This fix validation error introduced by:
+          https://github.com/home-assistant/core/issues/118668
+        For further details please look at
+          https://github.com/home-assistant/core/blob/dev/homeassistant/components/alarm_control_panel/__init__.py#L184C1-L188C1
+        """
+        return False  # or self._attr_code_arm_required
+
     @property
     def state(self) -> StateType:
         """Return the state of the entity."""
@@ -153,3 +166,9 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
         _LOGGER.info(
             f"INIM alarm panel is going to be updated with: {state}/{self._scenarios[state]}"  # noqa: G004
         )
+
+        # see daikin integration, async_schedule_update_ha_state
+        # await self.async_device_update()
+        # self.async_write_ha_state()
+        # await self.async_update_ha_state()
+        # self.async_schedule_update_ha_state(True)
