@@ -3,6 +3,7 @@
     "@nidble"
   ],
   "config_flow": false,
+  "issue_tracker": "https://github.com/nidble/inim_alarm/issues",
   "dependencies": [],
   "documentation": "https://github.com/nidble/inim_alarm/",
   "domain": "inim",
