@@ -1,20 +1,24 @@
 # Loads default set of integrations. Do not remove.
 default_config:
 
-alarm_control_panel:
-  - platform: inim
-    password: !secret inim_alarm_password
-    username: !secret inim_alarm_username
-    client_id: "123456"
-    device_id: "789012"
-    # scenarios: # use this to override default scenario ids
-    #   armed_away: 0
-    #   disarmed: 1
-    #   armed_night: 2
-    #   armed_home: 3
-
 inim:
   password: !secret inim_alarm_password
   username: !secret inim_alarm_username
   client_id: "123456"
   device_id: "789012"
+  # TODO: add support for panels
+  # panels:
+  #   - name: roof
+  #     unique_id: roof
+  #     scenarios: # use this to override default scenario ids
+  #       armed_away: 0
+  #       disarmed: 1
+  #       armed_night: 2
+  #       armed_home: 3
+  #   - name: 1st Floor
+  #     unique_id: 1stfloor
+  #     scenarios:
+  #       armed_away: 3
+  #       disarmed: 3
+  #       armed_night: 1
+  #       armed_home: 5
