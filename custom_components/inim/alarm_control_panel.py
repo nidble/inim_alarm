@@ -7,7 +7,7 @@ import logging
 # from aiohttp import ClientError
 from pyinim.inim_cloud import InimCloud
 
-from config.inim_alarm.custom_components.inim.types import InimResult
+# from config.inim_alarm.custom_components.inim.types import InimResult #TODO fix broken import
 from homeassistant.components.alarm_control_panel import (
     AlarmControlPanelEntity,
     AlarmControlPanelEntityFeature,
@@ -83,7 +83,7 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
 
     def __init__(
         self,
-        coordinator: DataUpdateCoordinator[InimResult],
+        coordinator: DataUpdateCoordinator,  # TODO: provide proper Generic type ie: # coordinator: DataUpdateCoordinator[InimResult],
         inim: InimCloud,
         device_id: str,
         scenarios: Mapping[str, int],
@@ -110,14 +110,9 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
     @cached_property
     def code_arm_required(self) -> bool:
         """Whether the code is required for arm actions."""
-
-        """
-        This fix validation error introduced by:
-          https://github.com/home-assistant/core/issues/118668
-        For further details please look at
-          https://github.com/home-assistant/core/blob/dev/homeassistant/components/alarm_control_panel/__init__.py#L184C1-L188C1
-        """
-        return False  # or self._attr_code_arm_required
+        # https://github.com/home-assistant/core/blob/dev/homeassistant/components/alarm_control_panel/__init__.py#L184C1-L188C1
+        # https://github.com/home-assistant/core/issues/118668
+        return False  # self._attr_code_arm_required
 
     @property
     def state(self) -> StateType:
@@ -166,9 +161,3 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
         _LOGGER.info(
             f"INIM alarm panel is going to be updated with: {state}/{self._scenarios[state]}"  # noqa: G004
         )
-
-        # see daikin integration, async_schedule_update_ha_state
-        # await self.async_device_update()
-        # self.async_write_ha_state()
-        # await self.async_update_ha_state()
-        # self.async_schedule_update_ha_state(True)
