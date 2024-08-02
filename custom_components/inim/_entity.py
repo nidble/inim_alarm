@@ -70,3 +70,10 @@ class RingEntity(CoordinatorEntity[_RingCoordinatorT]):
         if device := self._get_coordinator_device():
             self._device = device
         super()._handle_coordinator_update()
+
+
+# see daikin integration, async_schedule_update_ha_state
+# await self.async_device_update()
+# self.async_write_ha_state()
+# await self.async_update_ha_state()
+# self.async_schedule_update_ha_state(True)
