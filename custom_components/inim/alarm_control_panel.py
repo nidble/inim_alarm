@@ -12,6 +12,7 @@ from homeassistant.components.alarm_control_panel import (
     AlarmControlPanelEntity,
     AlarmControlPanelEntityFeature,
 )
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     STATE_ALARM_ARMED_AWAY,
     STATE_ALARM_ARMED_HOME,
@@ -27,24 +28,65 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
 )
 
-from .const import CONF_DEVICE_ID, CONF_SCENARIOS, DOMAIN
+from .const import CONF_DEVICE_ID, CONF_PANELS, CONF_SCENARIOS, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-CONST_ALARM_CONTROL_PANEL_NAME = "Alarm Panel"
+CONST_MANUFACTURER = "Inim"
+
+# async def async_setup_platform(
+#     hass: HomeAssistant,
+#     config,
+#     async_add_entities: AddEntitiesCallback,
+#     discovery_info=None,
+# ):
+#     """Setups the sensor platform."""
+
+#     coordinator = hass.data[DOMAIN]["coordinator"]
+#     inim_cloud_api = hass.data[DOMAIN]["inim_cloud_api"]
+#     conf = hass.data[DOMAIN]["conf"]
+
+#     # Fetch initial data so we have data when entities subscribe
+#     #
+#     # If the refresh fails, async_config_entry_first_refresh will
+#     # raise ConfigEntryNotReady and setup will try again later
+#     #
+#     # If you do not want to retry setup on failure, use
+#     # coordinator.async_refresh() instead
+#     #
+#     # await coordinator.async_config_entry_first_refresh()
+#     # devices: InimResult = coordinator.data
+
+#     _LOGGER.warn(f"INIM alarm panel was updated with CONF: {conf}")  # noqa: G004
+
+#     alarm_control_panels = [
+#         InimAlarmControlPanelEntity(
+#             coordinator,
+#             inim_cloud_api,
+#             conf[CONF_DEVICE_ID],
+#             panel,
+#             "0.0.1",
+#         )
+#         for panel in conf[CONF_PANELS]
+#     ]
+#     async_add_entities(alarm_control_panels, update_before_add=True)
 
 
-async def async_setup_platform(
+async def async_setup_entry(
     hass: HomeAssistant,
-    config,
+    config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
-    discovery_info=None,
 ):
-    """Setups the sensor platform."""
+    """Set up the Alarm Control Panel."""
+    # This gets the data update coordinator from hass.data as specified in your __init__.py
+    coordinator: DataUpdateCoordinator = hass.data[DOMAIN][
+        config_entry.entry_id
+    ].coordinator
 
-    coordinator = hass.data[DOMAIN]["coordinator"]
-    inim_cloud_api = hass.data[DOMAIN]["inim_cloud_api"]
-    conf = hass.data[DOMAIN]["conf"]
+    inim_cloud_api = hass.data[DOMAIN][config_entry.entry_id].inim_cloud_api
+
+    panels = config_entry.data[CONF_PANELS]
+    device_id = config_entry.data[CONF_DEVICE_ID]
 
     # Fetch initial data so we have data when entities subscribe
     #
@@ -56,17 +98,21 @@ async def async_setup_platform(
     #
     # await coordinator.async_config_entry_first_refresh()
     # devices: InimResult = coordinator.data
-
+    _LOGGER.warning(
+        "INIM alarm panel was created/updated for the following panels: %s", panels
+    )
     alarm_control_panels = [
         InimAlarmControlPanelEntity(
             coordinator,
             inim_cloud_api,
-            conf[CONF_DEVICE_ID],
-            conf[CONF_SCENARIOS],
-            "alarm_control_panel",
+            device_id,
+            panel_conf,
             "0.0.1",
         )
+        for panel_conf in panels
     ]
+
+    # Create the alarm control panel
     async_add_entities(alarm_control_panels, update_before_add=True)
 
 
@@ -77,6 +123,7 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
         AlarmControlPanelEntityFeature.ARM_NIGHT
         | AlarmControlPanelEntityFeature.ARM_AWAY
         | AlarmControlPanelEntityFeature.ARM_HOME
+        | AlarmControlPanelEntityFeature.ARM_VACATION
     )
     _attr_has_entity_name = True
     _attr_name = None
@@ -86,24 +133,25 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
         coordinator: DataUpdateCoordinator,  # TODO: provide proper Generic type ie: # coordinator: DataUpdateCoordinator[InimResult],
         inim: InimCloud,
         device_id: str,
-        scenarios: Mapping[str, int],
-        unique_id: str,
+        panel,  # TODO add type
+        # scenarios: Mapping[str, int],
+        # unique_id: str,
         version: str,
     ):
         """Initialize the alarm control panel."""
 
         super().__init__(coordinator)  # , context=zone.ZoneId)
 
+        panel_name = panel["panel_name"]
         self._client = inim
         self._device_id = device_id
-        self._scenarios = scenarios
-
-        self._attr_unique_id = unique_id
+        self._scenarios = panel[CONF_SCENARIOS]
+        self._attr_unique_id = panel["unique_id"]
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, unique_id)},
-            name=f"{self._client.name} {CONST_ALARM_CONTROL_PANEL_NAME}",
-            manufacturer="Inim",
-            model=CONST_ALARM_CONTROL_PANEL_NAME,
+            identifiers={(DOMAIN, self._attr_unique_id)},
+            name=panel_name,
+            manufacturer=CONST_MANUFACTURER,
+            model=panel_name,
             sw_version=version,
         )
 

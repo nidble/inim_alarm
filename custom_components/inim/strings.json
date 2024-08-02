@@ -1,0 +1,33 @@
+{
+  "config": {
+    "error": {
+      "auth": "Invalid username/password or clientId",
+      "invalid_panel": "The panel provided is not valid. Should be in the format `<blablabla>`."
+    },
+    "step": {
+      "user": {
+        "data": {
+          "username": "Inim Username",
+          "password": "Inim Password",
+          "device_id": "Inim DeviceId",
+          "client_id": "Inim ClientId"
+        },
+        "description": "Enter your Inim credentials.",
+        "title": "Authentication"
+      },
+      "panel": {
+        "data": {
+          "panel_name": "Name of the panel",
+          "armed_away": "Armed Away",
+          "disarmed": "Disarmed",
+          "armed_night": "Armed Night",
+          "armed_home": "Armed Home",
+          "armed_vacation": "Armed Vacation",
+          "add_another": "Add another repo?"
+        },
+        "description": "Enter your Panel name and configure your Scenarios",
+        "title": "Panel"
+      }
+    }
+  }
+}

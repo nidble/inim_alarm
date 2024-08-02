@@ -4,7 +4,7 @@
   "codeowners": [
     "@nidble"
   ],
-  "config_flow": false,
+  "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/nidble/inim_alarm/",
   "iot_class": "cloud_polling",
@@ -12,5 +12,5 @@
   "requirements": [
     "pyinim==0.0.18"
   ],
-  "version": "0.1.20"
+  "version": "0.2.0"
 }

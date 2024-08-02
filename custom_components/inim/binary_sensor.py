@@ -2,6 +2,7 @@ import logging
 
 from homeassistant import core
 from homeassistant.components.binary_sensor import BinarySensorEntity
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import (
@@ -15,25 +16,51 @@ from .types import Device, InimResult, Zone
 
 _LOGGER = logging.getLogger(__name__)
 
+# async def deprecated_async_setup_platform(
+#     hass: core.HomeAssistant,
+#     config,
+#     async_add_entities: AddEntitiesCallback,
+#     discovery_info=None,
+# ):
+#     """Setups the sensor platform."""
 
-async def async_setup_platform(
+#     coordinator = hass.data[DOMAIN]["coordinator"]
+#     conf = hass.data[DOMAIN]["conf"]
+
+#     await coordinator.async_config_entry_first_refresh()
+#     device_id = conf[CONF_DEVICE_ID]
+#     res: Device = coordinator.data.Data[device_id]
+
+#     async_add_entities(
+#         InimBinarySensorEntity(coordinator, zone, device_id) for zone in res.Zones
+#     )
+
+
+async def async_setup_entry(
     hass: core.HomeAssistant,
-    config,
+    config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
-    discovery_info=None,
 ):
-    """Setups the sensor platform."""
+    """Set up the Binary Sensors."""
+    # This gets the data update coordinator from hass.data as specified in your __init__.py
+    coordinator: DataUpdateCoordinator = hass.data[DOMAIN][
+        config_entry.entry_id
+    ].coordinator
 
-    coordinator = hass.data[DOMAIN]["coordinator"]
-    conf = hass.data[DOMAIN]["conf"]
-
-    await coordinator.async_config_entry_first_refresh()
-    device_id = conf[CONF_DEVICE_ID]
+    device_id = config_entry.data[CONF_DEVICE_ID]
     res: Device = coordinator.data.Data[device_id]
 
-    async_add_entities(
+    # ----------------------------------------------------------------------------
+    # Here we are going to add some binary sensors for the contact sensors in our
+    # mock data. So we add an instance of our ExampleBinarySensor class for each
+    # contact sensor we have in our data.
+    # ----------------------------------------------------------------------------
+    binary_sensors = [
         InimBinarySensorEntity(coordinator, zone, device_id) for zone in res.Zones
-    )
+    ]
+
+    # Create the binary sensors.
+    async_add_entities(binary_sensors)
 
 
 class InimBinarySensorEntity(CoordinatorEntity, BinarySensorEntity):
@@ -54,8 +81,8 @@ class InimBinarySensorEntity(CoordinatorEntity, BinarySensorEntity):
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, zone.ZoneId)},
             manufacturer="Inim",
-            model=Zone.Type,
-            name=Zone.Name,
+            model=zone.Type,
+            name=zone.Name,
         )
         self._attr_unique_id = self.get_unique_id()
 

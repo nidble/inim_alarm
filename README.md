@@ -8,7 +8,7 @@ Custom Component/Integration for controlling Inim alarm through [Home Assistant]
 
 TODO
 
-### Manual Installation
+<!-- ### Manual Installation
 
 You can manually install as a custom component on your Home Assistant installation.
 
@@ -26,7 +26,7 @@ Follow these steps:
     ```
     for further detail look at `config/configuration.yam` present in this repository.
 
-* Restart Home Assistant
+* Restart Home Assistant -->
 
 ## Configuration
 
