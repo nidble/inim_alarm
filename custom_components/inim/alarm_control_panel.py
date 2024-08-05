@@ -34,43 +34,6 @@ _LOGGER = logging.getLogger(__name__)
 
 CONST_MANUFACTURER = "Inim"
 
-# async def async_setup_platform(
-#     hass: HomeAssistant,
-#     config,
-#     async_add_entities: AddEntitiesCallback,
-#     discovery_info=None,
-# ):
-#     """Setups the sensor platform."""
-
-#     coordinator = hass.data[DOMAIN]["coordinator"]
-#     inim_cloud_api = hass.data[DOMAIN]["inim_cloud_api"]
-#     conf = hass.data[DOMAIN]["conf"]
-
-#     # Fetch initial data so we have data when entities subscribe
-#     #
-#     # If the refresh fails, async_config_entry_first_refresh will
-#     # raise ConfigEntryNotReady and setup will try again later
-#     #
-#     # If you do not want to retry setup on failure, use
-#     # coordinator.async_refresh() instead
-#     #
-#     # await coordinator.async_config_entry_first_refresh()
-#     # devices: InimResult = coordinator.data
-
-#     _LOGGER.warn(f"INIM alarm panel was updated with CONF: {conf}")  # noqa: G004
-
-#     alarm_control_panels = [
-#         InimAlarmControlPanelEntity(
-#             coordinator,
-#             inim_cloud_api,
-#             conf[CONF_DEVICE_ID],
-#             panel,
-#             "0.0.1",
-#         )
-#         for panel in conf[CONF_PANELS]
-#     ]
-#     async_add_entities(alarm_control_panels, update_before_add=True)
-
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -78,7 +41,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ):
     """Set up the Alarm Control Panel."""
-    # This gets the data update coordinator from hass.data as specified in your __init__.py
+    # This gets the DataUpdateCoordinator from hass.data as specified in your __init__.py
     coordinator: DataUpdateCoordinator = hass.data[DOMAIN][
         config_entry.entry_id
     ].coordinator

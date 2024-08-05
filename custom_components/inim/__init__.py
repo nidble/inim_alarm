@@ -6,7 +6,6 @@ import logging
 
 from pyinim.inim_cloud import InimCloud
 
-# import voluptuous as vol
 from homeassistant import core
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -17,10 +16,6 @@ from homeassistant.const import (
 )
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-
-# import homeassistant.helpers.config_validation as cv
-# from homeassistant.helpers.discovery import async_load_platform
-# from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import CONF_CLIENT_ID, CONF_DEVICE_ID, DOMAIN
@@ -28,11 +23,6 @@ from .types import InimResult
 
 _LOGGER = logging.getLogger(__name__)
 
-# ----------------------------------------------------------------------------
-# A list of the different platforms we wish to setup.
-# Add or remove from this list based on your specific need
-# of entity platform types.
-# ----------------------------------------------------------------------------
 PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
     Platform.ALARM_CONTROL_PANEL,
@@ -55,11 +45,6 @@ async def async_setup_entry(
 
     hass.data.setdefault(DOMAIN, {})
 
-    # ----------------------------------------------------------------------------
-    # Initialise the coordinator that manages data updates from your api.
-    # This is defined in coordinator.py
-    # ----------------------------------------------------------------------------
-    # coordinator = ExampleCoordinator(hass, config_entry)
     username = config_entry.data[CONF_USERNAME]
     password = config_entry.data[CONF_PASSWORD]
     client_id = config_entry.data[CONF_CLIENT_ID]
@@ -89,11 +74,6 @@ async def async_setup_entry(
         update_interval=scan_interval,
     )
 
-    # ----------------------------------------------------------------------------
-    # Perform an initial data load from api.
-    # async_config_entry_first_refresh() is special in that it does not log errors
-    # if it fails.
-    # ----------------------------------------------------------------------------
     await coordinator.async_config_entry_first_refresh()
     # or
     # await coordinator.async_refresh()
@@ -123,9 +103,6 @@ async def async_setup_entry(
     # accessible throughout your integration
     # Note: this will change on HA2024.6 to save on the config entry.
     # ----------------------------------------------------------------------------
-    # hass.data[DOMAIN][config_entry.entry_id] = RuntimeData(
-    #     coordinator, cancel_update_listener
-    # )
     hass.data.setdefault(DOMAIN, {})[config_entry.entry_id] = RuntimeData(
         coordinator, inim_cloud_api, cancel_update_listener
     )
@@ -148,64 +125,6 @@ async def async_setup_entry(
 
     # Return true to denote a successful setup.
     return True
-
-
-# async def deprecated_async_setup(hass: core.HomeAssistant, config: ConfigType) -> bool:
-#     """Set up the platform.
-
-#     @NOTE: `config` is the full dict from `configuration.yaml`.
-
-#     :returns: A boolean to indicate that initialization was successful.
-#     """
-#     conf = config[DOMAIN]
-#     scan_interval = conf[CONF_SCAN_INTERVAL]
-#     device_id = conf[CONF_DEVICE_ID]
-
-#     inim = InimCloud(
-#         async_get_clientsession(hass),
-#         name="Inim",
-#         username=conf[CONF_USERNAME],
-#         password=conf[CONF_PASSWORD],
-#         client_id=conf[CONF_CLIENT_ID],
-#     )
-
-#     async def async_fetch_inim() -> InimResult:
-#         await inim.get_request_poll(device_id)
-#         _, _, res = await inim.get_devices_extended(device_id)
-#         return res
-
-#     coordinator = DataUpdateCoordinator(
-#         hass,
-#         _LOGGER,
-#         # Name of the data. For logging purposes.
-#         name=DOMAIN,
-#         update_method=async_fetch_inim,
-#         # Polling interval. Will only be polled if there are subscribers.
-#         update_interval=scan_interval,
-#     )
-
-#     # Fetch initial data so we have data when entities subscribe
-#     await coordinator.async_refresh()
-
-#     hass.data[DOMAIN] = {
-#         "conf": conf,
-#         "coordinator": coordinator,
-#         "inim_cloud_api": inim,
-#     }
-
-#     # hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
-#     #     INIM_API: inim,
-#     #     INIM_DEVICES: inim.devices(),
-#     #     INIM_DEVICES_COORDINATOR: devices_coordinator,
-#     #     INIM_NOTIFICATIONS_COORDINATOR: notifications_coordinator,
-#     # }
-
-#     hass.async_create_task(
-#         async_load_platform(hass, "alarm_control_panel", DOMAIN, {}, conf)
-#     )
-#     hass.async_create_task(async_load_platform(hass, "binary_sensor", DOMAIN, {}, conf))
-
-#     return True
 
 
 async def _async_update_listener(hass: core.HomeAssistant, config_entry: ConfigEntry):

@@ -16,25 +16,6 @@ from .types import Device, InimResult, Zone
 
 _LOGGER = logging.getLogger(__name__)
 
-# async def deprecated_async_setup_platform(
-#     hass: core.HomeAssistant,
-#     config,
-#     async_add_entities: AddEntitiesCallback,
-#     discovery_info=None,
-# ):
-#     """Setups the sensor platform."""
-
-#     coordinator = hass.data[DOMAIN]["coordinator"]
-#     conf = hass.data[DOMAIN]["conf"]
-
-#     await coordinator.async_config_entry_first_refresh()
-#     device_id = conf[CONF_DEVICE_ID]
-#     res: Device = coordinator.data.Data[device_id]
-
-#     async_add_entities(
-#         InimBinarySensorEntity(coordinator, zone, device_id) for zone in res.Zones
-#     )
-
 
 async def async_setup_entry(
     hass: core.HomeAssistant,
@@ -50,11 +31,6 @@ async def async_setup_entry(
     device_id = config_entry.data[CONF_DEVICE_ID]
     res: Device = coordinator.data.Data[device_id]
 
-    # ----------------------------------------------------------------------------
-    # Here we are going to add some binary sensors for the contact sensors in our
-    # mock data. So we add an instance of our ExampleBinarySensor class for each
-    # contact sensor we have in our data.
-    # ----------------------------------------------------------------------------
     binary_sensors = [
         InimBinarySensorEntity(coordinator, zone, device_id) for zone in res.Zones
     ]
@@ -116,7 +92,7 @@ class InimBinarySensorEntity(CoordinatorEntity, BinarySensorEntity):
     # def extra_state_attributes(self):
     #     return {"matches": self.matches}
 
-    # tasmota
+    # code example:
     # @core.callback
     # def on_off_state_updated(self, state: bool, **kwargs: Any) -> None:
     #     """Handle state updates."""

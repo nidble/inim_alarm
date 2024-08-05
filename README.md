@@ -8,26 +8,6 @@ Custom Component/Integration for controlling Inim alarm through [Home Assistant]
 
 TODO
 
-<!-- ### Manual Installation
-
-You can manually install as a custom component on your Home Assistant installation.
-
-Follow these steps:
-
-* In Home Assistant's config directory, you need to create a `custom_components` and copy all the content of the `custom_components/inim` folder.
-
-* Open your `config/configuration.yaml` file and be sure to add - at the least - the following lines:
-    ```yaml
-    inim:
-    password: !secret inim_alarm_password
-    username: !secret inim_alarm_username
-    client_id: "123456"
-    device_id: "789012"
-    ```
-    for further detail look at `config/configuration.yam` present in this repository.
-
-* Restart Home Assistant -->
-
 ## Configuration
 
 TODO
