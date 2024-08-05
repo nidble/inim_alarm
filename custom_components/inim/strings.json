@@ -2,7 +2,7 @@
   "config": {
     "error": {
       "auth": "Invalid username/password or clientId",
-      "invalid_panel": "The panel provided is not valid. Should be in the format `<blablabla>`."
+      "invalid_panel": "The panel provided is not valid. Should be in the number format."
     },
     "step": {
       "user": {
