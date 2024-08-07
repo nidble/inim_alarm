@@ -23,7 +23,8 @@
           "armed_night": "Armed Night",
           "armed_home": "Armed Home",
           "armed_vacation": "Armed Vacation",
-          "add_another": "Add another repo?"
+          "armed_custom_bypass": "Armed Custom Bypass",
+          "add_another": "Add another panel?"
         },
         "description": "Enter your Panel name and configure your Scenarios",
         "title": "Panel"

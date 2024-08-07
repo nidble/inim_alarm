@@ -13,6 +13,7 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL,
     CONF_USERNAME,
     STATE_ALARM_ARMED_AWAY,
+    STATE_ALARM_ARMED_CUSTOM_BYPASS,
     STATE_ALARM_ARMED_HOME,
     STATE_ALARM_ARMED_NIGHT,
     STATE_ALARM_ARMED_VACATION,
@@ -46,6 +47,7 @@ DEFAULT_SCENARIOS_SCHEMA = {
     STATE_ALARM_ARMED_NIGHT: 2,
     STATE_ALARM_ARMED_HOME: 3,
     STATE_ALARM_ARMED_VACATION: 0,
+    STATE_ALARM_ARMED_CUSTOM_BYPASS: 0,
 }
 
 PANEL_SCHEMA = vol.Schema(
@@ -67,6 +69,9 @@ PANEL_SCHEMA = vol.Schema(
         ): cv.positive_int,
         vol.Optional(
             STATE_ALARM_ARMED_VACATION, description={"suggested_value": 0}
+        ): cv.positive_int,
+        vol.Optional(
+            STATE_ALARM_ARMED_CUSTOM_BYPASS, description={"suggested_value": 0}
         ): cv.positive_int,
         vol.Optional("add_another"): cv.boolean,
     }
@@ -197,6 +202,10 @@ class GithubCustomConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         STATE_ALARM_ARMED_VACATION,
                         DEFAULT_SCENARIOS_SCHEMA[STATE_ALARM_ARMED_VACATION],
                     ),
+                    STATE_ALARM_ARMED_CUSTOM_BYPASS: user_input.get(
+                        STATE_ALARM_ARMED_CUSTOM_BYPASS,
+                        DEFAULT_SCENARIOS_SCHEMA[STATE_ALARM_ARMED_CUSTOM_BYPASS],
+                    ),
                 }
             except ValueError:
                 errors["base"] = "invalid_panel"
@@ -211,11 +220,11 @@ class GithubCustomConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     }
                 )
                 # If user ticked the box show this form again so they can add an
-                # additional repo.
+                # additional panel.
                 if user_input.get("add_another", False):
                     return await self.async_step_panel()
 
-                # User is done adding repos, create the config entry.
+                # User is done adding panels, create the config entry.
                 return self.async_create_entry(title="Inim Alarm", data=self.data)
 
         return self.async_show_form(
