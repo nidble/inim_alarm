@@ -13,7 +13,6 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL,
     CONF_USERNAME,
     STATE_ALARM_ARMED_AWAY,
-    STATE_ALARM_ARMED_CUSTOM_BYPASS,
     STATE_ALARM_ARMED_HOME,
     STATE_ALARM_ARMED_NIGHT,
     STATE_ALARM_ARMED_VACATION,
@@ -47,7 +46,7 @@ DEFAULT_SCENARIOS_SCHEMA = {
     STATE_ALARM_ARMED_NIGHT: 2,
     STATE_ALARM_ARMED_HOME: 3,
     STATE_ALARM_ARMED_VACATION: 0,
-    STATE_ALARM_ARMED_CUSTOM_BYPASS: 0,
+    # STATE_ALARM_ARMED_CUSTOM_BYPASS: 0,
 }
 
 PANEL_SCHEMA = vol.Schema(
@@ -70,9 +69,9 @@ PANEL_SCHEMA = vol.Schema(
         vol.Optional(
             STATE_ALARM_ARMED_VACATION, description={"suggested_value": 0}
         ): cv.positive_int,
-        vol.Optional(
-            STATE_ALARM_ARMED_CUSTOM_BYPASS, description={"suggested_value": 0}
-        ): cv.positive_int,
+        # vol.Optional(
+        #     STATE_ALARM_ARMED_CUSTOM_BYPASS, description={"suggested_value": 0}
+        # ): cv.positive_int,
         vol.Optional("add_another"): cv.boolean,
     }
 )
@@ -202,10 +201,10 @@ class GithubCustomConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         STATE_ALARM_ARMED_VACATION,
                         DEFAULT_SCENARIOS_SCHEMA[STATE_ALARM_ARMED_VACATION],
                     ),
-                    STATE_ALARM_ARMED_CUSTOM_BYPASS: user_input.get(
-                        STATE_ALARM_ARMED_CUSTOM_BYPASS,
-                        DEFAULT_SCENARIOS_SCHEMA[STATE_ALARM_ARMED_CUSTOM_BYPASS],
-                    ),
+                    # STATE_ALARM_ARMED_CUSTOM_BYPASS: user_input.get(
+                    #     STATE_ALARM_ARMED_CUSTOM_BYPASS,
+                    #     DEFAULT_SCENARIOS_SCHEMA[STATE_ALARM_ARMED_CUSTOM_BYPASS],
+                    # ),
                 }
             except ValueError:
                 errors["base"] = "invalid_panel"

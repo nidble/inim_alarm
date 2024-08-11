@@ -15,7 +15,6 @@ from homeassistant.components.alarm_control_panel import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     STATE_ALARM_ARMED_AWAY,
-    STATE_ALARM_ARMED_CUSTOM_BYPASS,
     STATE_ALARM_ARMED_HOME,
     STATE_ALARM_ARMED_NIGHT,
     STATE_ALARM_ARMED_VACATION,
@@ -89,7 +88,7 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
         | AlarmControlPanelEntityFeature.ARM_AWAY
         | AlarmControlPanelEntityFeature.ARM_HOME
         | AlarmControlPanelEntityFeature.ARM_VACATION
-        | AlarmControlPanelEntityFeature.ARM_CUSTOM_BYPASS
+        # | AlarmControlPanelEntityFeature.ARM_CUSTOM_BYPASS
     )
     _attr_has_entity_name = True
     _attr_name = None
@@ -130,30 +129,33 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
     def state(self) -> StateType:
         """Return the state of the entity."""
         try:
-            scenario = self.coordinator.data.Data[self._device_id].ActiveScenario
+            device_data = self.coordinator.data.Data[self._device_id]
+            scenarios = (int(x) for x in device_data.ActiveScenarios.split(","))
             _LOGGER.info(
-                "INIM alarm panel %s was updated with scenario: %s",
+                "INIM alarm panel %s state is going to be updated with the following ActiveScenarios: %s of %s",
                 self._attr_unique_id,
-                scenario,
+                list(scenarios),
+                self._scenarios,
             )
 
-            if scenario == self._scenarios[STATE_ALARM_ARMED_AWAY]:
-                return STATE_ALARM_ARMED_AWAY
+            for scenario in scenarios:
+                if scenario == self._scenarios[STATE_ALARM_ARMED_AWAY]:
+                    return STATE_ALARM_ARMED_AWAY
 
-            if scenario == self._scenarios[STATE_ALARM_DISARMED]:
-                return STATE_ALARM_DISARMED
+                if scenario == self._scenarios[STATE_ALARM_DISARMED]:
+                    return STATE_ALARM_DISARMED
 
-            if scenario == self._scenarios[STATE_ALARM_ARMED_NIGHT]:
-                return STATE_ALARM_ARMED_NIGHT
+                if scenario == self._scenarios[STATE_ALARM_ARMED_NIGHT]:
+                    return STATE_ALARM_ARMED_NIGHT
 
-            if scenario == self._scenarios[STATE_ALARM_ARMED_HOME]:
-                return STATE_ALARM_ARMED_HOME
+                if scenario == self._scenarios[STATE_ALARM_ARMED_HOME]:
+                    return STATE_ALARM_ARMED_HOME
 
-            if scenario == self._scenarios[STATE_ALARM_ARMED_VACATION]:
-                return STATE_ALARM_ARMED_VACATION
+                if scenario == self._scenarios[STATE_ALARM_ARMED_VACATION]:
+                    return STATE_ALARM_ARMED_VACATION
 
-            if scenario == self._scenarios[STATE_ALARM_ARMED_CUSTOM_BYPASS]:
-                return STATE_ALARM_ARMED_CUSTOM_BYPASS
+                # if scenario == self._scenarios[STATE_ALARM_ARMED_CUSTOM_BYPASS]:
+                #     return STATE_ALARM_ARMED_CUSTOM_BYPASS
 
         except Exception as e:
             _LOGGER.exception("Error retrieving data from INIM services: %s", e)
@@ -178,9 +180,9 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
         """Send arm vacation command."""
         await self._async_arm(STATE_ALARM_ARMED_VACATION)
 
-    async def async_alarm_arm_custom_bypass(self, code: str | None = None) -> None:
-        """Send arm vacation command."""
-        await self._async_arm(STATE_ALARM_ARMED_CUSTOM_BYPASS)
+    # async def async_alarm_arm_custom_bypass(self, code: str | None = None) -> None:
+    #     """Send arm vacation command."""
+    #     await self._async_arm(STATE_ALARM_ARMED_CUSTOM_BYPASS)
 
     async def _async_arm(self, state: str):
         await self._client.get_activate_scenario(
