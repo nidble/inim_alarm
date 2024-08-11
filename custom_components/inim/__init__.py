@@ -111,11 +111,7 @@ async def async_setup_entry(
     # Setup platforms (based on the list of entity types in PLATFORMS defined above)
     # This calls the async_setup method in each of your entity type files.
     # ----------------------------------------------------------------------------
-    for platform in PLATFORMS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(config_entry, platform)
-        )
-
+    await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
     # ----------------------------------------------------------------------------
     # Setup global services
     # This can be done here but included in a seperate file for ease of reading.
