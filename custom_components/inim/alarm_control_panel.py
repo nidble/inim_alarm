@@ -131,14 +131,13 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
         try:
             device_data = self.coordinator.data.Data[self._device_id]
             scenarios = (int(x) for x in device_data.ActiveScenarios.split(","))
-            _LOGGER.info(
-                "INIM alarm panel %s state is going to be updated with the following ActiveScenarios: %s of %s",
-                self._attr_unique_id,
-                list(scenarios),
-                self._scenarios,
-            )
 
             for scenario in scenarios:
+                _LOGGER.info(
+                    "INIM alarm panel %s state is going to be updated with the following scenario %s",
+                    self._attr_unique_id,
+                    scenario,
+                )
                 if scenario == self._scenarios[STATE_ALARM_ARMED_AWAY]:
                     return STATE_ALARM_ARMED_AWAY
 
