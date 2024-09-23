@@ -80,22 +80,36 @@ The client ID can be anything from "homeassistant" to an UUID, just do not inclu
 
 To gather the DeviceID follow the steps [here](#discover-your-device-id)
 
-## TODO:
-How to list and identify Scenarios
-
 ## Discover your device ID
 
 To discover your device ID you can use the method InimCloud.get_devices_list from pyInim library.
 To do so you can use the script in the tool path following the example:
 
+#### Install the requirements:
 ```bash
 git clone https://github.com/nidble/pyinim
 cd pyinim
 python -m venv venv
 source venv/bin/activate
 pip install -r tools/requirements.txt
-python tools/list_devices_id.py --username <YOUR_INIM_USERNAME> --password <YOUR_INIM_PASSWORD>
 ```
+
+#### List the devices id:
+```bash
+python tools/inim_cli.py --username <YOUR_INIM_USERNAME> --password <YOUR_INIM_PASSWORD> --list deviceid
+```
+
+#### List the scenarios id:
+```bash
+python tools/inim_cli.py --username <YOUR_INIM_USERNAME> --password <YOUR_INIM_PASSWORD> --list scenarios
+```
+
+#### List the areas id:
+```bash
+python tools/inim_cli.py --username <YOUR_INIM_USERNAME> --password <YOUR_INIM_PASSWORD> --list areas
+```
+
+
 
 ## Disclaimer
 
