@@ -11,15 +11,9 @@ from pyinim.inim_cloud import InimCloud
 from homeassistant.components.alarm_control_panel import (
     AlarmControlPanelEntity,
     AlarmControlPanelEntityFeature,
+    AlarmControlPanelState,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    STATE_ALARM_ARMED_AWAY,
-    STATE_ALARM_ARMED_HOME,
-    STATE_ALARM_ARMED_NIGHT,
-    STATE_ALARM_ARMED_VACATION,
-    STATE_ALARM_DISARMED,
-)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -126,7 +120,7 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
         return False  # self._attr_code_arm_required
 
     @property
-    def state(self) -> StateType:
+    def alarm_state(self) -> AlarmControlPanelState:
         """Return the state of the entity."""
         try:
             device_data = self.coordinator.data.Data[self._device_id]
@@ -138,20 +132,20 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
                     self._attr_unique_id,
                     scenario,
                 )
-                if scenario == self._scenarios[STATE_ALARM_ARMED_AWAY]:
-                    return STATE_ALARM_ARMED_AWAY
+                if scenario == self._scenarios[AlarmControlPanelState.ARMED_AWAY]:
+                    return AlarmControlPanelState.ARMED_AWAY
 
-                if scenario == self._scenarios[STATE_ALARM_DISARMED]:
-                    return STATE_ALARM_DISARMED
+                if scenario == self._scenarios[AlarmControlPanelState.DISARMED]:
+                    return AlarmControlPanelState.DISARMED
 
-                if scenario == self._scenarios[STATE_ALARM_ARMED_NIGHT]:
-                    return STATE_ALARM_ARMED_NIGHT
+                if scenario == self._scenarios[AlarmControlPanelState.ARMED_NIGHT]:
+                    return AlarmControlPanelState.ARMED_NIGHT
 
-                if scenario == self._scenarios[STATE_ALARM_ARMED_HOME]:
-                    return STATE_ALARM_ARMED_HOME
+                if scenario == self._scenarios[AlarmControlPanelState.ARMED_HOME]:
+                    return AlarmControlPanelState.ARMED_HOME
 
-                if scenario == self._scenarios[STATE_ALARM_ARMED_VACATION]:
-                    return STATE_ALARM_ARMED_VACATION
+                if scenario == self._scenarios[AlarmControlPanelState.ARMED_VACATION]:
+                    return AlarmControlPanelState.ARMED_VACATION
 
                 # if scenario == self._scenarios[STATE_ALARM_ARMED_CUSTOM_BYPASS]:
                 #     return STATE_ALARM_ARMED_CUSTOM_BYPASS
@@ -161,27 +155,27 @@ class InimAlarmControlPanelEntity(CoordinatorEntity, AlarmControlPanelEntity):
 
     async def async_alarm_disarm(self, code: str | None = None) -> None:
         """Send disarm command."""
-        await self._async_arm(STATE_ALARM_DISARMED)
+        await self._async_arm(AlarmControlPanelState.DISARMED)
 
     async def async_alarm_arm_away(self, code: str | None = None) -> None:
         """Send arm away command."""
-        await self._async_arm(STATE_ALARM_ARMED_AWAY)
+        await self._async_arm(AlarmControlPanelState.ARMED_AWAY)
 
     async def async_alarm_arm_home(self, code: str | None = None) -> None:
         """Send arm home command."""
-        await self._async_arm(STATE_ALARM_ARMED_HOME)
+        await self._async_arm(AlarmControlPanelState.ARMED_HOME)
 
     async def async_alarm_arm_night(self, code: str | None = None) -> None:
         """Send arm night command."""
-        await self._async_arm(STATE_ALARM_ARMED_NIGHT)
+        await self._async_arm(AlarmControlPanelState.ARMED_NIGHT)
 
     async def async_alarm_arm_vacation(self, code: str | None = None) -> None:
         """Send arm vacation command."""
-        await self._async_arm(STATE_ALARM_ARMED_VACATION)
+        await self._async_arm(AlarmControlPanelState.ARMED_VACATION)
 
     # async def async_alarm_arm_custom_bypass(self, code: str | None = None) -> None:
     #     """Send arm vacation command."""
-    #     await self._async_arm(STATE_ALARM_ARMED_CUSTOM_BYPASS)
+    #     await self._async_arm(AlarmControlPanelState.ARMED_CUSTOM_BYPASS)
 
     async def _async_arm(self, state: str):
         await self._client.get_activate_scenario(
