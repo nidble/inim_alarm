@@ -14,7 +14,7 @@ from homeassistant.const import (
     CONF_USERNAME,
     Platform,
 )
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryNotReady, ConfigEntryAuthFailed
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
@@ -31,7 +31,7 @@ PLATFORMS: list[Platform] = [
 
 @dataclass
 class RuntimeData:
-    """Class to hold your data."""
+    """Class to hold inim data."""
 
     coordinator: DataUpdateCoordinator
     inim_cloud_api: InimCloud
@@ -41,7 +41,7 @@ class RuntimeData:
 async def async_setup_entry(
     hass: core.HomeAssistant, config_entry: ConfigEntry
 ) -> bool:
-    """Set up Example Integration from a config entry."""
+    """Set up Inim Integration from a config entry."""
 
     hass.data.setdefault(DOMAIN, {})
 
@@ -59,10 +59,14 @@ async def async_setup_entry(
         client_id=client_id,
     )
 
-    async def async_fetch_inim() -> InimResult:
-        await inim_cloud_api.get_request_poll(device_id)
-        _, _, res = await inim_cloud_api.get_devices_extended(device_id)
-        return res
+    async def async_fetch_inim() -> InimResult | None:
+        try:
+            await inim_cloud_api.get_request_poll(device_id)
+            _, _, res = await inim_cloud_api.get_devices_extended(device_id)
+            return res
+        except Exception as ex:
+            # raise ConfigEntryAuthFailed("Credentials expired for Inim Cloud") from ex
+            config_entry.async_start_reauth(hass)
 
     coordinator = DataUpdateCoordinator(
         hass,
